@@ -1,0 +1,213 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: kgcsregistry.azurecr.io
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Get commit SHA
+        id: commit
+        run: echo "sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+
+      - name: Build and push Orchestrator image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./orchestrator
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/kgcs-orchestrator:${{ steps.commit.outputs.sha }}
+            ${{ env.REGISTRY }}/kgcs-orchestrator:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/kgcs-orchestrator:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/kgcs-orchestrator:buildcache,mode=max
+
+      - name: Build and push Systems Agent image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./agents/systems
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/kgcs-systems:${{ steps.commit.outputs.sha }}
+            ${{ env.REGISTRY }}/kgcs-systems:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/kgcs-systems:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/kgcs-systems:buildcache,mode=max
+
+      - name: Build and push Offensive Agent image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./agents/offensive
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/kgcs-offensive:${{ steps.commit.outputs.sha }}
+            ${{ env.REGISTRY }}/kgcs-offensive:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/kgcs-offensive:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/kgcs-offensive:buildcache,mode=max
+
+      - name: Build and push Defensive Agent image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./agents/defensive
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/kgcs-defensive:${{ steps.commit.outputs.sha }}
+            ${{ env.REGISTRY }}/kgcs-defensive:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/kgcs-defensive:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/kgcs-defensive:buildcache,mode=max
+
+  terraform-plan-dev:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: 'development'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform format check
+        run: terraform fmt -check -recursive terraform/
+
+      - name: Terraform init
+        run: |
+          cd terraform
+          terraform init \
+            -backend-config="resource_group_name=kgcs-tf-state-rg" \
+            -backend-config="storage_account_name=kgcstfstate" \
+            -backend-config="container_name=terraform-state" \
+            -backend-config="key=kgcs-dev.tfstate"
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+      - name: Terraform validate
+        run: |
+          cd terraform
+          terraform validate
+
+      - name: Terraform plan (dev)
+        id: plan
+        run: |
+          cd terraform
+          terraform plan -var-file="vars/dev.tfvars" -out=tfplan.dev
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan-dev
+          path: terraform/tfplan.dev
+
+      - name: Comment PR with plan
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## Terraform Plan (dev)\n\nPlan artifact available in workflow artifacts.'
+            })
+
+  terraform-apply-dev:
+    needs: terraform-plan-dev
+    runs-on: ubuntu-latest
+    environment: 'development'
+    permissions:
+      contents: read
+
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.0
+
+      - name: Download plan artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: tfplan-dev
+          path: terraform/
+
+      - name: Terraform init
+        run: |
+          cd terraform
+          terraform init \
+            -backend-config="resource_group_name=kgcs-tf-state-rg" \
+            -backend-config="storage_account_name=kgcstfstate" \
+            -backend-config="container_name=terraform-state" \
+            -backend-config="key=kgcs-dev.tfstate"
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+      - name: Terraform apply (dev)
+        run: |
+          cd terraform
+          terraform apply tfplan.dev
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+  smoke-tests-dev:
+    needs: terraform-apply-dev
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run smoke tests (dev)
+        uses: ./.github/workflows/smoke-tests/
+        with:
+          environment: dev
+          orchestrator_url: ${{ secrets.DEV_ORCHESTRATOR_URL }}

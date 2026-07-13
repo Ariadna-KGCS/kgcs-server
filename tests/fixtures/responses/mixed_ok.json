@@ -1,0 +1,56 @@
+{
+  "_comment": "Representative mixed orchestration response for CVE-2021-44228 (Log4Shell). Validates full causal chain CVE->CWE->CAPEC->ATT&CK->D3FEND/ENGAGE. IMPLEMENTS edges rebuilt from CAPEC XML (239 edges total in kgcs-v2). Shape validated against kgcs-v2, 2026-03.",
+  "version": "1.0",
+  "correlation_id": "550e8400-e29b-41d4-a716-446655440014",
+  "status": "ok",
+  "data": {
+    "systems": {
+      "vulnerabilities": [
+        {
+          "cveId": "CVE-2021-44228",
+          "published": "2021-12-10T00:00:00Z",
+          "scores": [{"version": "3.1", "baseScore": 10.0, "baseSeverity": "CRITICAL"}],
+          "weaknesses": [{"cweId": "CWE-917"}, {"cweId": "CWE-20"}]
+        }
+      ]
+    },
+    "offensive": {
+      "attack_patterns": [
+        {
+          "capecId": "CAPEC-88",
+          "techniques": [{"techniqueId": "T1059", "mapping_type": "direct"}]
+        }
+      ]
+    },
+    "defensive": {
+      "defensive_coverage": [
+        {"techniqueId": "D3-NTF", "source": "D3FEND"},
+        {"conceptId": "EAC0002", "source": "ENGAGE"}
+      ]
+    },
+    "risk": {
+      "value": 0.92,
+      "band": "CRITICAL",
+      "method": "heuristic-v1"
+    }
+  },
+  "provenance": [
+    {"source": "NVD",          "ids": ["CVE-2021-44228"]},
+    {"source": "MITRE-CWE",    "ids": ["CWE-917", "CWE-20"]},
+    {"source": "MITRE-CAPEC",  "ids": ["CAPEC-88"]},
+    {"source": "MITRE-ATT&CK", "ids": ["T1059"]},
+    {"source": "MITRE-D3FEND", "ids": ["D3-NTF"]},
+    {"source": "MITRE-ENGAGE", "ids": ["EAC0002"]}
+  ],
+  "confidence": {
+    "value": 0.88,
+    "basis": "MULTI_AGENT_WEIGHTED",
+    "signals": {
+      "rows": 5,
+      "hops": 5,
+      "shape_validated": true
+    },
+    "degradation": []
+  },
+  "errors": []
+}

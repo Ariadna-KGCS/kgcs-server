@@ -1,0 +1,11 @@
+{
+  "_comment": "Edge case: attack_path for CWE-79 (XSS). ATT&CK mappings may be inherited via the CAPEC parent hierarchy (not direct). The offensive agent exposes mapping_type='inherited_via_parent_capec' when the path goes through a parent CAPEC node. This is expected behaviour, not an error. Validated against kgcs-v2, 2026-03 (CHILD_OF edges: 533 in graph).",
+  "request": {
+    "version": "1.0",
+    "correlation_id": "550e8400-e29b-41d4-a716-446655440024",
+    "agent": "master",
+    "intent": "attack_path",
+    "payload": {"cweId": "CWE-79"}
+  },
+  "notes": "CWE-79 has no direct CAPEC mapping in many datasets. The CAPEC parent-hierarchy traversal (CAPEC-85 -> CAPEC-580 -> T1082) makes inherited ATT&CK paths visible. Responses with mapping_type='inherited_via_parent_capec' are valid and expected — callers should not treat them as errors. If the ATT&CK STIX bundle has no direct CAPEC cross-references (as in the 2026-03 dataset), IMPLEMENTS edges are sourced exclusively from CAPEC XML taxonomy mappings."
+}

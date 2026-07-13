@@ -1,0 +1,14 @@
+{
+  "_comment": "Known-good vuln_lookup by CVE-2021-44228 (Log4Shell). Validated against kgcs-v2, 2026-03.",
+  "version": "1.0",
+  "correlation_id": "550e8400-e29b-41d4-a716-446655440010",
+  "agent": "master",
+  "intent": "vuln_lookup",
+  "payload": {
+    "cveId": "CVE-2021-44228"
+  },
+  "constraints": {
+    "max_hops": 4,
+    "allow_extensions": false
+  }
+}

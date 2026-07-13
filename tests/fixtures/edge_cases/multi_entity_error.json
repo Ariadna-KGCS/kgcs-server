@@ -1,0 +1,16 @@
+{
+  "_comment": "Edge case: /ask prompt contains two CVE identifiers. The entity extractor raises MultipleEntitiesError and the API returns HTTP 400 with an error message. Pipeline aborts before graph execution.",
+  "request": {
+    "prompt": "Compare CVE-2021-44228 and CVE-2021-45046 attack paths",
+    "session_id": null
+  },
+  "expected_http_status": 400,
+  "expected_response": {
+    "status": "error",
+    "errors": [
+      "Multiple entities of type 'cveId' found: only single-entity queries are supported"
+    ],
+    "correlation_id": "<uuid>"
+  },
+  "notes": "MultipleEntitiesError is raised by ai/entity_extractor.py and caught by orchestrator/api.py. The AI layer does not support multi-entity queries in the current release. Each query must anchor to a single CVE, CWE, ATT&CK technique, or CPE."
+}

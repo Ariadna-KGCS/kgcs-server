@@ -1,0 +1,14 @@
+{
+  "_comment": "Known-good coverage_map by ATT&CK technique T1190 (Exploit Public-Facing Application). Validated against kgcs-v2, 2026-03.",
+  "version": "1.0",
+  "correlation_id": "550e8400-e29b-41d4-a716-446655440013",
+  "agent": "master",
+  "intent": "coverage_map",
+  "payload": {
+    "attackId": "T1190"
+  },
+  "constraints": {
+    "max_hops": 4,
+    "allow_extensions": false
+  }
+}

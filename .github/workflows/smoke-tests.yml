@@ -1,0 +1,144 @@
+name: Smoke Tests
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      orchestrator_url:
+        required: true
+        type: string
+      api_key:
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  smoke-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Wait for service to become healthy
+        run: |
+          MAX_RETRIES=30
+          RETRY_COUNT=0
+          until [ $RETRY_COUNT -ge $MAX_RETRIES ]; do
+            if curl -sf "${{ inputs.orchestrator_url }}/health" > /dev/null 2>&1; then
+              echo "Service is healthy"
+              exit 0
+            fi
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            echo "Waiting for service... (attempt $RETRY_COUNT/$MAX_RETRIES)"
+            sleep 10
+          done
+          echo "Service failed to become healthy within $((MAX_RETRIES * 10))s"
+          exit 1
+
+      # -----------------------------------------------------------------------
+      # Functional checks — delegates to scripts/smoke_test.py (stdlib-only,
+      # 8 checks: /health, /ready, all 4 /query intents, /ask, invalid payload).
+      # -----------------------------------------------------------------------
+
+      - name: Functional smoke checks (scripts/smoke_test.py)
+        env:
+          KGCS_API_URL: ${{ inputs.orchestrator_url }}
+          KGCS_API_KEY: ${{ inputs.api_key }}
+        run: |
+          python scripts/smoke_test.py \
+            --base-url "${{ inputs.orchestrator_url }}" \
+            ${{ inputs.api_key != '' && format('--api-key "{0}"', inputs.api_key) || '' }}
+
+      # -----------------------------------------------------------------------
+      # Latency check — a single /query must respond within 5 seconds.
+      # -----------------------------------------------------------------------
+
+      - name: Latency check
+        run: |
+          python -c "
+          import requests
+          import time
+
+          api_key = '${{ inputs.api_key }}'
+          headers = {'Authorization': f'Bearer {api_key}'} if api_key else {}
+
+          start = time.time()
+          response = requests.post(
+              '${{ inputs.orchestrator_url }}/query',
+              json={
+                  'version': '1.0',
+                  'correlation_id': 'ci-latency-check',
+                  'agent': 'master',
+                  'intent': 'vuln_lookup',
+                  'payload': {'cveId': 'CVE-2021-44228'},
+              },
+              headers=headers,
+              timeout=10,
+          )
+          elapsed_ms = (time.time() - start) * 1000
+          print(f'Request latency: {elapsed_ms:.0f} ms')
+
+          assert elapsed_ms < 5000, f'FAIL: latency {elapsed_ms:.0f} ms exceeds 5000 ms critical threshold'
+          if elapsed_ms > 3000:
+              print(f'WARNING: latency {elapsed_ms:.0f} ms exceeds 3000 ms warning threshold')
+          else:
+              print(f'PASS: latency {elapsed_ms:.0f} ms is within threshold')
+          "
+
+      # -----------------------------------------------------------------------
+      # Throughput check — 100 concurrent /query requests, >=95% success.
+      # -----------------------------------------------------------------------
+
+      - name: Throughput check (100 concurrent requests)
+        run: |
+          python -c "
+          import requests
+          import concurrent.futures
+
+          api_key = '${{ inputs.api_key }}'
+          headers = {'Authorization': f'Bearer {api_key}'} if api_key else {}
+
+          def make_request():
+              try:
+                  resp = requests.post(
+                      '${{ inputs.orchestrator_url }}/query',
+                      json={
+                          'version': '1.0',
+                          'correlation_id': 'ci-throughput-check',
+                          'agent': 'master',
+                          'intent': 'vuln_lookup',
+                          'payload': {'cveId': 'CVE-2021-44228'},
+                      },
+                      headers=headers,
+                      timeout=15,
+                  )
+                  return resp.status_code == 200
+              except Exception:
+                  return False
+
+          with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+              results = list(executor.map(lambda _: make_request(), range(100)))
+
+          success_rate = sum(results) / len(results) * 100
+          print(f'Throughput: {success_rate:.0f}% success rate ({sum(results)}/100 requests)')
+          assert success_rate >= 95, f'FAIL: success rate {success_rate:.0f}% below 95% threshold'
+          print('PASS: throughput check passed')
+          "
+
+      - name: Smoke tests complete
+        run: echo "All smoke checks passed for environment=${{ inputs.environment }}"

@@ -1,0 +1,19 @@
+{
+  "_comment": "Edge case: /query request with a missing required payload field. SchemaValidator raises a validation error and the API returns HTTP 400 before reaching the orchestrator.",
+  "request": {
+    "version": "1.0",
+    "correlation_id": "550e8400-e29b-41d4-a716-446655440023",
+    "agent": "master",
+    "intent": "vuln_lookup",
+    "payload": {}
+  },
+  "expected_http_status": 400,
+  "expected_response": {
+    "status": "error",
+    "errors": [
+      "Request validation failed: payload must satisfy at least one of: matchCriteriaId, cpeName, cpe, cveId"
+    ],
+    "correlation_id": "550e8400-e29b-41d4-a716-446655440023"
+  },
+  "notes": "Schema validation uses docs/04-graph/schemas/request-schema.json. For vuln_lookup, payload must contain at least one of: matchCriteriaId, cpeName, cpe (legacy alias), or cveId. An empty payload object fails the anyOf constraint."
+}

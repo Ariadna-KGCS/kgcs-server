@@ -1,0 +1,61 @@
+{
+  "_comment": "Representative coverage_map response for T1190 (Exploit Public-Facing Application). Shape validated against kgcs-v2, 2026-03.",
+  "version": "1.0",
+  "correlation_id": "550e8400-e29b-41d4-a716-446655440013",
+  "status": "ok",
+  "data": {
+    "technique": {
+      "techniqueId": "T1190",
+      "name": "Exploit Public-Facing Application",
+      "tactics": ["Initial Access"]
+    },
+    "defensive_coverage": [
+      {
+        "techniqueId": "D3-NTF",
+        "name": "Network Traffic Filtering",
+        "source": "D3FEND",
+        "coverage_type": "COUNTERS"
+      },
+      {
+        "conceptId": "EAC0002",
+        "name": "Establish Accounts",
+        "source": "ENGAGE",
+        "coverage_type": "ENGAGE_ACTIVITY"
+      }
+    ],
+    "coverage_count": {
+      "d3fend": 1,
+      "car": 0,
+      "shield": 0,
+      "engage": 1
+    }
+  },
+  "provenance": [
+    {
+      "source": "MITRE-ATT&CK",
+      "ids": ["T1190"],
+      "timestamp": null
+    },
+    {
+      "source": "MITRE-D3FEND",
+      "ids": ["D3-NTF"],
+      "timestamp": null
+    },
+    {
+      "source": "MITRE-ENGAGE",
+      "ids": ["EAC0002"],
+      "timestamp": null
+    }
+  ],
+  "confidence": {
+    "value": 0.8,
+    "basis": "COVERAGE_MAP",
+    "signals": {
+      "rows": 2,
+      "hops": 2,
+      "shape_validated": true
+    },
+    "degradation": []
+  },
+  "errors": []
+}

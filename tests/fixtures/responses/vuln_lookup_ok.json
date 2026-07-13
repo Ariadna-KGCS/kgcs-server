@@ -1,0 +1,81 @@
+{
+  "_comment": "Representative vuln_lookup response for CVE-2021-44228 (Log4Shell). Shape validated against kgcs-v2, 2026-03. Field values are indicative — live data may differ.",
+  "version": "1.0",
+  "correlation_id": "550e8400-e29b-41d4-a716-446655440010",
+  "status": "ok",
+  "data": {
+    "vulnerabilities": [
+      {
+        "cveId": "CVE-2021-44228",
+        "published": "2021-12-10T00:00:00Z",
+        "lastModified": "2024-01-01T00:00:00Z",
+        "source": "NVD",
+        "scores": [
+          {
+            "version": "3.1",
+            "baseScore": 10.0,
+            "baseSeverity": "CRITICAL"
+          }
+        ],
+        "weaknesses": [
+          {
+            "cweId": "CWE-917",
+            "name": "Improper Neutralization of Special Elements used in an Expression Language Statement"
+          },
+          {
+            "cweId": "CWE-20",
+            "name": "Improper Input Validation"
+          }
+        ]
+      }
+    ],
+    "resolvedPlatforms": [
+      {
+        "cpeUri": "cpe:2.3:a:apache:log4j:2.14.1:*:*:*:*:*:*:*",
+        "cpeNameId": "<uuid>",
+        "vendor": "apache",
+        "product": "log4j",
+        "version": "2.14.1"
+      }
+    ],
+    "applicability": {
+      "configurations": [
+        {
+          "operator": "OR",
+          "negate": false,
+          "nodes": [
+            {
+              "operator": "OR",
+              "negate": false,
+              "criteria": [
+                {
+                  "matchCriteriaId": "<uuid>",
+                  "criteria": "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+                  "vulnerable": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "provenance": [
+    {
+      "source": "NVD",
+      "ids": ["CVE-2021-44228"],
+      "timestamp": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "confidence": {
+    "value": 0.9,
+    "basis": "COMPLETE_CHAIN",
+    "signals": {
+      "rows": 1,
+      "hops": 2,
+      "shape_validated": true
+    },
+    "degradation": []
+  },
+  "errors": []
+}

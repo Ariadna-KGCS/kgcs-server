@@ -1,0 +1,56 @@
+{
+  "_comment": "Representative attack_path response for CWE-20.Confirmed via live CWE-20 direct mapping and CWE-79 via CAPEC parent-hierarchy (inherited path, mapping_type='inherited_via_parent_capec'). Shape validated against kgcs-v2, 2026-03.",
+  "version": "1.0",
+  "correlation_id": "550e8400-e29b-41d4-a716-446655440012",
+  "status": "ok",
+  "data": {
+    "weakness": {
+      "cweId": "CWE-20",
+      "name": "Improper Input Validation",
+      "abstraction": "Pillar"
+    },
+    "attack_patterns": [
+      {
+        "capecId": "CAPEC-88",
+        "name": "OS Command Injection",
+        "techniques": [
+          {
+            "techniqueId": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "mapping_type": "direct",
+            "tactics": ["Execution"]
+          }
+        ]
+      }
+    ],
+    "path_depth": 3
+  },
+  "provenance": [
+    {
+      "source": "MITRE-CWE",
+      "ids": ["CWE-20"],
+      "timestamp": null
+    },
+    {
+      "source": "MITRE-CAPEC",
+      "ids": ["CAPEC-88"],
+      "timestamp": null
+    },
+    {
+      "source": "MITRE-ATT&CK",
+      "ids": ["T1059"],
+      "timestamp": null
+    }
+  ],
+  "confidence": {
+    "value": 0.85,
+    "basis": "COMPLETE_CHAIN",
+    "signals": {
+      "rows": 1,
+      "hops": 3,
+      "shape_validated": true
+    },
+    "degradation": []
+  },
+  "errors": []
+}

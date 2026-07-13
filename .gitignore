@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+.venv/
+venv/
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*~
+.env
+*.log
+logs/
+
+# Pinned spec materialization (see SPEC_VERSION)
+spec/

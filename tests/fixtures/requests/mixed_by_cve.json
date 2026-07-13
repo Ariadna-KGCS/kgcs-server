@@ -1,0 +1,14 @@
+{
+  "_comment": "Known-good mixed orchestration by CVE-2021-44228 (Log4Shell). Validates full causal chain: CVE -> CWE -> CAPEC -> ATT&CK -> D3FEND/ENGAGE. Validated against kgcs-v2, 2026-03.",
+  "version": "1.0",
+  "correlation_id": "550e8400-e29b-41d4-a716-446655440014",
+  "agent": "master",
+  "intent": "mixed",
+  "payload": {
+    "cveId": "CVE-2021-44228"
+  },
+  "constraints": {
+    "max_hops": 6,
+    "allow_extensions": false
+  }
+}

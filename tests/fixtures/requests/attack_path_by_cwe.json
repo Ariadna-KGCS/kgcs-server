@@ -1,0 +1,14 @@
+{
+  "_comment": "Known-good attack_path by CWE-20 (Improper Input Validation). Validated against kgcs-v2, 2026-03. Also confirmed for CWE-79 via CAPEC parent-hierarchy (inherited path visibility).",
+  "version": "1.0",
+  "correlation_id": "550e8400-e29b-41d4-a716-446655440012",
+  "agent": "master",
+  "intent": "attack_path",
+  "payload": {
+    "cweId": "CWE-20"
+  },
+  "constraints": {
+    "max_hops": 6,
+    "allow_extensions": false
+  }
+}

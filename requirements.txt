@@ -1,0 +1,20 @@
+# kgcs-server dependencies
+
+# Neo4j Python driver (read-only client in agents/shared)
+neo4j>=5.0.0
+
+# Typed data structures for agent responses
+pydantic>=2.0.0
+
+# JSON Schema validation (Draft-07) against spec/contracts/
+jsonschema>=4.0.0
+
+# HTTP API (orchestrator/api.py)
+aiohttp>=3.9.0
+
+# Optional: .env loading for local runs
+python-dotenv>=1.0.0
+
+# Testing
+pytest>=7.0.0
+pytest-aiohttp>=1.0.0
