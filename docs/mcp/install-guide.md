@@ -4,6 +4,8 @@ Step-by-step setup to query the KGCS knowledge graph from Claude (Desktop or Cow
 
 > **Note.** This uses the generic Neo4j Labs Cypher MCP server pointed at the KGCS graph. The KGCS-native MCP server (grounded tools on top of the agent layer, Roadmap v3 · F3) will live in `kgcs-server/mcp/` and get its own guide.
 
+> **New here?** For the fast path (restore a ready-made dump, connect Claude Desktop, done in ~10-15 minutes) see [`quickstart.md`](quickstart.md) ([català: `quickstart.ca.md`](quickstart.ca.md)). This page is the full reference — every option, every failure mode.
+
 ```
 Claude Desktop / Cowork ──stdio──> mcp-neo4j-cypher ──bolt://──> Neo4j (KGCS graph)
 ```
