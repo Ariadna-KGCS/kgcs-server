@@ -37,6 +37,6 @@ The KGCS graph can be queried directly from Claude (Desktop / Cowork) through th
 
 ## Status
 
-Migrated from the seed repo (Release B baseline). **450 tests passing locally** (the remaining 18 of the historical 468 are ETL tests, now in `kgcs-pipeline`). Pinned to `kgcs-spec` **v1.0.0**. Docs under `docs/` (architecture, agents, security, release history).
+Migrated from the seed repo (Release B baseline). **450/450 tests green in CI** (the remaining 18 of the historical 468 are ETL tests, in `kgcs-pipeline`), plus 25/25 JSON Schema contract checks (`tools/verify_schemas.py`) — `Test` workflow added 2026-07-27, run green on `main`. Pinned to `kgcs-spec` **v1.0.0**. Docs under `docs/` (architecture, agents, security, release history). **Public since 2026-07-27** (private preview launch); independent `gitleaks` scan clean.
 
-**CI on GitHub is currently red** (confirmed 2026-07-27): the `Build and Deploy` workflow's last two runs on `main` both failed (2026-07-13, 2026-07-20); `Smoke Tests` exists but has no recorded run on `main` yet. Treat the local test count as evidence of local state only until this is fixed — tracked as part of M0 in the umbrella `ROADMAP.md`.
+`Build and Deploy` is gated to manual dispatch only (2026-07-27) — it builds+pushes Docker images to Azure infra that doesn't exist yet (`kgcs-infra` is dormant by design), so it no longer runs automatically on push.
