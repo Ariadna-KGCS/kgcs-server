@@ -26,7 +26,7 @@ Claude Desktop / Cowork ──stdio──> mcp-neo4j-cypher ──bolt://──>
 The MCP schema tool requires the APOC plugin, so enable it from the start.
 
 > **Note.** Neo4j has no separate install step here — the `docker run` command below
-> pulls the official `neo4j:5` image on first run (~1-2 minutes) and runs it as a
+> pulls the official `neo4j:2026.05-community` image on first run (~1-2 minutes) and runs it as a
 > container. If you're used to Neo4j Desktop: you don't need it for this guide, and the
 > "reference setup" mentioned at the bottom of this doc (Neo4j Enterprise) is only what
 > the KGCS graph was validated against, not a requirement for you.
@@ -37,7 +37,7 @@ docker run -d --name kgcs-neo4j \
   -e NEO4J_AUTH=neo4j/<choose-a-password> \
   -e NEO4J_PLUGINS='["apoc"]' \
   -v kgcs_neo4j_data:/data \
-  neo4j:5
+  neo4j:2026.05-community
 ```
 
 Check it's up: open http://localhost:7474 and log in with `neo4j` / your password.
@@ -58,7 +58,7 @@ docker stop kgcs-neo4j
 docker run --rm \
   -v kgcs_neo4j_data:/data \
   -v /path/to/folder-with-dump:/dumps \
-  neo4j:5 \
+  neo4j:2026.05-community \
   neo4j-admin database load neo4j --from-path=/dumps --overwrite-destination=true
 
 docker start kgcs-neo4j
@@ -147,6 +147,7 @@ Property names in the graph are camelCase and source-specific (`cveId`, `cweId`,
 
 | Symptom | Likely cause / fix |
 |---|---|
+| Dump restore fails, gives wrong node counts, or Docker-based Neo4j "just doesn't work" while a native/Desktop Neo4j install works fine | Docker image on an incompatible major-version line. Neo4j moved to calendar versioning (2025+); `neo4j:5` is the old line and cannot cleanly load a dump from a `2026.x` instance. Use `neo4j:2026.05-community` (matches the reference setup and the published dump). |
 | Tools don't appear in Claude after restart | `uvx` not on Claude's PATH. Replace `"command": "uvx"` with the absolute path (Windows: `%USERPROFILE%\.local\bin\uvx.exe`; macOS/Linux: `~/.local/bin/uvx`). Check logs under Claude's `logs/` folder (`mcp-server-kgcs-neo4j.log`). |
 | `Authentication failure` | `NEO4J_PASSWORD` doesn't match the one set in `NEO4J_AUTH` at first container start. Auth is fixed at first boot; recreate the volume or reset the password. |
 | `get_neo4j_schema` fails, queries work | APOC missing. Recreate the container with `NEO4J_PLUGINS='["apoc"]'`. |
@@ -156,6 +157,6 @@ Property names in the graph are camelCase and source-specific (`cveId`, `cweId`,
 
 ## Versions this guide was validated against
 
-- Neo4j 2026.05.0 (Enterprise, reference setup) — the `neo4j:5` community image works identically for the steps above
+- Neo4j 2026.05.0 (Enterprise, reference setup) — use the `neo4j:2026.05-community` Docker image for the steps above (same calendar-versioned release line as the reference setup and the published dump). **Corrected 2026-07-27:** earlier revisions of this guide pinned `neo4j:5`, an older, incompatible major-version line (Neo4j moved to calendar versioning in 2025) — a dump from 2026.05.0 will not restore cleanly into it. If you already have a `neo4j:5`-based setup from before this fix, recreate the container with the tag above.
 - `mcp-neo4j-cypher` 0.6.0
 - KGCS graph per `kgcs-spec` v1.0.0 (6,007,052 nodes at validation time)

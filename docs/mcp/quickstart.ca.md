@@ -47,7 +47,7 @@ recordis — la necessitaràs de nou al pas 3.
 
 > **Neo4j en si no necessita cap instal·lació separada.** No hi ha cap aplicació a
 > descarregar més enllà de Docker — la comanda de sota es descarrega la imatge oficial
-> `neo4j:5` la primera vegada que l'executes (~1-2 minuts, depenent de la teva connexió)
+> `neo4j:2026.05-community` la primera vegada que l'executes (~1-2 minuts, depenent de la teva connexió)
 > i l'executa com a contenidor. Això és tota la "instal·lació".
 
 ```bash
@@ -56,7 +56,7 @@ docker run -d --name kgcs-neo4j \
   -e NEO4J_AUTH=neo4j/<choose-a-password> \
   -e NEO4J_PLUGINS='["apoc"]' \
   -v kgcs_neo4j_data:/data \
-  neo4j:5
+  neo4j:2026.05-community
 ```
 
 ✅ **Checkpoint:** obre [http://localhost:7474](http://localhost:7474) al navegador.
@@ -82,7 +82,7 @@ docker stop kgcs-neo4j
 docker run --rm \
   -v kgcs_neo4j_data:/data \
   -v /path/to/kgcs-dump:/dumps \
-  neo4j:5 \
+  neo4j:2026.05-community \
   neo4j-admin database load neo4j --from-path=/dumps --overwrite-destination=true
 
 docker start kgcs-neo4j
