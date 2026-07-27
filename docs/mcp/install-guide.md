@@ -12,7 +12,7 @@ Claude Desktop / Cowork ──stdio──> mcp-neo4j-cypher ──bolt://──>
 
 ## 1. Prerequisites
 
-- **Docker** (Desktop on Windows/macOS, engine on Linux) — for Neo4j.
+- **Docker** (Desktop on Windows/macOS, engine on Linux) — for Neo4j. You'll run the **Enterprise edition** image (see why below) — free for local, non-production use via a license-acceptance environment variable, no key required.
 - **Python 3.11+** — only needed for the ETL path (option B) and validation scripts.
 - **uv** — runs the MCP server via `uvx`:
   - Windows: `winget install astral-sh.uv`
@@ -26,23 +26,35 @@ Claude Desktop / Cowork ──stdio──> mcp-neo4j-cypher ──bolt://──>
 The MCP schema tool requires the APOC plugin, so enable it from the start.
 
 > **Note.** Neo4j has no separate install step here — the `docker run` command below
-> pulls the official `neo4j:2026.05-community` image on first run (~1-2 minutes) and runs it as a
-> container. If you're used to Neo4j Desktop: you don't need it for this guide, and the
-> "reference setup" mentioned at the bottom of this doc (Neo4j Enterprise) is only what
-> the KGCS graph was validated against, not a requirement for you.
+> pulls the official `neo4j:2026.05-enterprise` image on first run (~1-2 minutes) and runs
+> it as a container.
+>
+> **Why Enterprise, not Community (corrected 2026-07-27):** the published dump was created
+> on Neo4j Enterprise using the newer **Block** storage format. Community edition cannot
+> load a Block-format database at all — this isn't a version or licensing choice, it's a
+> hard capability limit (`Block format detected for database neo4j but unavailable in this
+> edition`). Enterprise is free for local, non-production use: just accept the evaluation
+> license via an environment variable (below), no key or account needed.
 
 ```bash
 docker run -d --name kgcs-neo4j \
   -p 7474:7474 -p 7687:7687 \
   -e NEO4J_AUTH=neo4j/<choose-a-password> \
   -e NEO4J_PLUGINS='["apoc"]' \
+  -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
   -v kgcs_neo4j_data:/data \
-  neo4j:2026.05-community
+  neo4j:2026.05-enterprise
 ```
+
+`<choose-a-password>` must be a real password, **not** the literal string `neo4j` —
+Neo4j rejects a password equal to the default username/value at first boot
+(`Invalid value for password. It cannot be 'neo4j', which is the default.`).
 
 Check it's up: open http://localhost:7474 and log in with `neo4j` / your password.
 
-**Database name.** The Docker community image has a single database, `neo4j` — use that everywhere below. Named databases (e.g. `kgcs-dv` on the reference setup) require Neo4j Enterprise; if you have it, substitute your database name consistently.
+**Database name.** This guide uses the single default database, `neo4j`, everywhere
+below. Named databases (e.g. `kgcs-dv` on the reference setup) are also supported by
+Enterprise if you want one; substitute your database name consistently if so.
 
 ## 3. Load the KGCS graph
 
@@ -58,7 +70,8 @@ docker stop kgcs-neo4j
 docker run --rm \
   -v kgcs_neo4j_data:/data \
   -v /path/to/folder-with-dump:/dumps \
-  neo4j:2026.05-community \
+  -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
+  neo4j:2026.05-enterprise \
   neo4j-admin database load neo4j --from-path=/dumps --overwrite-destination=true
 
 docker start kgcs-neo4j
@@ -147,7 +160,9 @@ Property names in the graph are camelCase and source-specific (`cveId`, `cweId`,
 
 | Symptom | Likely cause / fix |
 |---|---|
-| Dump restore fails, gives wrong node counts, or Docker-based Neo4j "just doesn't work" while a native/Desktop Neo4j install works fine | Docker image on an incompatible major-version line. Neo4j moved to calendar versioning (2025+); `neo4j:5` is the old line and cannot cleanly load a dump from a `2026.x` instance. Use `neo4j:2026.05-community` (matches the reference setup and the published dump). |
+| Dump restore fails, gives wrong node counts, or Docker-based Neo4j "just doesn't work" while a native/Desktop Neo4j install works fine | Docker image on an incompatible major-version line. Neo4j moved to calendar versioning (2025+); `neo4j:5` is the old line and cannot cleanly load a dump from a `2026.x` instance. Use `neo4j:2026.05-enterprise` (matches the reference setup and the published dump). |
+| `neo4j-admin database load` fails with `Block format detected for database neo4j but unavailable in this edition` | You're on the **Community** image. The dump uses Neo4j's Block storage format, Enterprise-only. Recreate the container from `neo4j:2026.05-enterprise` with `NEO4J_ACCEPT_LICENSE_AGREEMENT=yes` (see Step 2) and restore again — Community cannot load this dump at all, at any version. |
+| Container won't start: `Invalid value for password. It cannot be 'neo4j', which is the default.` | `NEO4J_AUTH` password was set to the literal string `neo4j`. Pick any different password, remove the container and volume (`docker rm -f kgcs-neo4j && docker volume rm kgcs_neo4j_data`) and recreate. |
 | Tools don't appear in Claude after restart | `uvx` not on Claude's PATH. Replace `"command": "uvx"` with the absolute path (Windows: `%USERPROFILE%\.local\bin\uvx.exe`; macOS/Linux: `~/.local/bin/uvx`). Check logs under Claude's `logs/` folder (`mcp-server-kgcs-neo4j.log`). |
 | `Authentication failure` | `NEO4J_PASSWORD` doesn't match the one set in `NEO4J_AUTH` at first container start. Auth is fixed at first boot; recreate the volume or reset the password. |
 | `get_neo4j_schema` fails, queries work | APOC missing. Recreate the container with `NEO4J_PLUGINS='["apoc"]'`. |
@@ -157,6 +172,6 @@ Property names in the graph are camelCase and source-specific (`cveId`, `cweId`,
 
 ## Versions this guide was validated against
 
-- Neo4j 2026.05.0 (Enterprise, reference setup) — use the `neo4j:2026.05-community` Docker image for the steps above (same calendar-versioned release line as the reference setup and the published dump). **Corrected 2026-07-27:** earlier revisions of this guide pinned `neo4j:5`, an older, incompatible major-version line (Neo4j moved to calendar versioning in 2025) — a dump from 2026.05.0 will not restore cleanly into it. If you already have a `neo4j:5`-based setup from before this fix, recreate the container with the tag above.
+- Neo4j 2026.05.0 (Enterprise, reference setup) — use the `neo4j:2026.05-enterprise` Docker image for the steps above (same calendar-versioned release line as the reference setup, and same edition — required because the published dump uses the Block storage format, Enterprise-only). **Corrected 2026-07-27, twice:** earlier revisions pinned `neo4j:5` (wrong major-version line — Neo4j moved to calendar versioning in 2025) then `neo4j:2026.05-community` (right version line, wrong edition — Community can't load a Block-format dump at all). Verified end to end: dump restores cleanly into `neo4j:2026.05-enterprise`, `MATCH (n) RETURN count(n)` returns 6,007,052, matching exactly.
 - `mcp-neo4j-cypher` 0.6.0
 - KGCS graph per `kgcs-spec` v1.0.0 (6,007,052 nodes at validation time)

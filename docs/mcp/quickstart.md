@@ -45,18 +45,25 @@ in one go. Replace `<choose-a-password>` with any password you'll remember — y
 need it again in Step 4.
 
 > **Neo4j itself doesn't need a separate install.** There's no app to download beyond
-> Docker — the command below pulls the official `neo4j:2026.05-community` image the first time you run
-> it (~1-2 minutes, depends on your connection) and runs it as a container. That's the
-> whole "installation."
+> Docker — the command below pulls the official `neo4j:2026.05-enterprise` image the
+> first time you run it (~1-2 minutes, depends on your connection) and runs it as a
+> container. That's the whole "installation." **Enterprise, not Community:** the
+> published dump uses Neo4j's Block storage format, which only Enterprise can read —
+> Enterprise is free for local, non-production use, just requires accepting the
+> evaluation license below (no key or account needed).
 
 ```bash
 docker run -d --name kgcs-neo4j \
   -p 7474:7474 -p 7687:7687 \
   -e NEO4J_AUTH=neo4j/<choose-a-password> \
   -e NEO4J_PLUGINS='["apoc"]' \
+  -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
   -v kgcs_neo4j_data:/data \
-  neo4j:2026.05-community
+  neo4j:2026.05-enterprise
 ```
+
+`<choose-a-password>` must be a real password, not the literal word `neo4j` — Neo4j
+refuses to boot with a password equal to the default value.
 
 ✅ **Checkpoint:** open [http://localhost:7474](http://localhost:7474) in your browser.
 You should see the Neo4j Browser login screen. Log in with username `neo4j` and the
@@ -80,7 +87,8 @@ docker stop kgcs-neo4j
 docker run --rm \
   -v kgcs_neo4j_data:/data \
   -v /path/to/kgcs-dump:/dumps \
-  neo4j:2026.05-community \
+  -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
+  neo4j:2026.05-enterprise \
   neo4j-admin database load neo4j --from-path=/dumps --overwrite-destination=true
 
 docker start kgcs-neo4j
@@ -166,5 +174,5 @@ whether KGCS is useful for your workflow.
 ## Something went wrong / need more detail?
 
 This page only covers the fast path. For building the graph from source instead of a
-dump, running on Neo4j Enterprise, or the full troubleshooting table, see
+dump, using a named database, or the full troubleshooting table, see
 [`install-guide.md`](install-guide.md).

@@ -47,17 +47,24 @@ recordis — la necessitaràs de nou al pas 3.
 
 > **Neo4j en si no necessita cap instal·lació separada.** No hi ha cap aplicació a
 > descarregar més enllà de Docker — la comanda de sota es descarrega la imatge oficial
-> `neo4j:2026.05-community` la primera vegada que l'executes (~1-2 minuts, depenent de la teva connexió)
-> i l'executa com a contenidor. Això és tota la "instal·lació".
+> `neo4j:2026.05-enterprise` la primera vegada que l'executes (~1-2 minuts, depenent de
+> la teva connexió) i l'executa com a contenidor. Això és tota la "instal·lació".
+> **Enterprise, no Community:** el dump publicat fa servir el format d'emmagatzematge
+> Block de Neo4j, que només Enterprise pot llegir — Enterprise és gratuït per a ús local
+> no productiu, només cal acceptar la llicència d'avaluació (sota, sense clau ni compte).
 
 ```bash
 docker run -d --name kgcs-neo4j \
   -p 7474:7474 -p 7687:7687 \
   -e NEO4J_AUTH=neo4j/<choose-a-password> \
   -e NEO4J_PLUGINS='["apoc"]' \
+  -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
   -v kgcs_neo4j_data:/data \
-  neo4j:2026.05-community
+  neo4j:2026.05-enterprise
 ```
+
+`<choose-a-password>` ha de ser una contrasenya real, no la paraula `neo4j` — Neo4j
+es nega a arrencar amb una contrasenya igual al valor per defecte.
 
 ✅ **Checkpoint:** obre [http://localhost:7474](http://localhost:7474) al navegador.
 Hauries de veure la pantalla de login del Neo4j Browser. Inicia sessió amb l'usuari
@@ -82,7 +89,8 @@ docker stop kgcs-neo4j
 docker run --rm \
   -v kgcs_neo4j_data:/data \
   -v /path/to/kgcs-dump:/dumps \
-  neo4j:2026.05-community \
+  -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
+  neo4j:2026.05-enterprise \
   neo4j-admin database load neo4j --from-path=/dumps --overwrite-destination=true
 
 docker start kgcs-neo4j
@@ -170,5 +178,5 @@ KGCS és útil per a la teva feina.
 ## Alguna cosa ha fallat / necessites més detall?
 
 Aquesta pàgina només cobreix el camí ràpid. Per construir el graf des de les fonts en
-lloc d'un dump, per executar-ho amb Neo4j Enterprise, o per la taula completa de
+lloc d'un dump, per fer servir una base de dades amb nom, o per la taula completa de
 troubleshooting, mira [`install-guide.md`](install-guide.md).
