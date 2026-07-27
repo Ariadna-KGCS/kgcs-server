@@ -44,7 +44,7 @@ Two options — the dump is fast, the ETL is fully reproducible.
 
 ### Option A — restore a dump (minutes)
 
-Ask the maintainer (humbert.costas@gmail.com) for the latest `neo4j.dump` (or `kgcs-dv.dump`). The file name must match the target database name — rename it to `neo4j.dump` if loading into the default database. Then:
+Download the pre-built graph from the [`kgcs-pipeline` GitHub Release](https://github.com/Ariadna-KGCS/kgcs-pipeline/releases/download/dataset-v1.0.0/kgcs-dv-2026-07-27T10-51-43.dump) (v1.0.0, ~812 MB). The file name must match the target database name — rename it to `neo4j.dump` if loading into the default database. Then:
 
 ```bash
 docker stop kgcs-neo4j
