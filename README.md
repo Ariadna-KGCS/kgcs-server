@@ -2,6 +2,27 @@
 
 Serves grounded cybersecurity answers from the KGCS graph. Part of [Ariadna](../README.md).
 
+## How it works
+
+The AI layer never writes Cypher or invents facts — it classifies intent, extracts
+entities, checks safety, and hands off to schema-driven agents that build and execute
+parameterized templates only:
+
+```mermaid
+flowchart LR
+    Q["Question"] --> CL["Classify"]
+    CL --> EX["Extract entities"]
+    EX --> SF["Safety check"]
+    SF --> BD["Build Cypher\n(template, parameterized)"]
+    BD --> EXE["Execute\n(read-only)"]
+    EXE <--> NEO[("KGCS Neo4j graph")]
+    EXE --> RD["Render"]
+    RD --> A["Grounded answer"]
+
+    classDef accent fill:#1F4E79,color:#fff,stroke:#2E6CB5;
+    class SF,EXE accent;
+```
+
 ## Layout
 
 - `agents/` — Systems, Offensive, Defensive agents (read-only, schema-driven Cypher templates) + `agents/shared/` (Neo4j client, response builder, confidence/risk scorers, schema validator, logging, types)
