@@ -15,3 +15,7 @@ logs/
 
 # Pinned spec materialization (see SPEC_VERSION)
 spec/
+
+# Local tooling binaries (downloaded by contributors, not project source)
+gitleaks.exe
+gitleaks
