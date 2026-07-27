@@ -37,4 +37,6 @@ The KGCS graph can be queried directly from Claude (Desktop / Cowork) through th
 
 ## Status
 
-Migrated from the seed repo (Release B baseline). **450 tests passing** (the remaining 18 of the historical 468 are ETL tests, now in `kgcs-pipeline`). Pinned to `kgcs-spec` **v1.0.0**. Docs under `docs/` (architecture, agents, security, release history).
+Migrated from the seed repo (Release B baseline). **450 tests passing locally** (the remaining 18 of the historical 468 are ETL tests, now in `kgcs-pipeline`). Pinned to `kgcs-spec` **v1.0.0**. Docs under `docs/` (architecture, agents, security, release history).
+
+**CI on GitHub is currently red** (confirmed 2026-07-27): the `Build and Deploy` workflow's last two runs on `main` both failed (2026-07-13, 2026-07-20); `Smoke Tests` exists but has no recorded run on `main` yet. Treat the local test count as evidence of local state only until this is fixed — tracked as part of M0 in the umbrella `ROADMAP.md`.
