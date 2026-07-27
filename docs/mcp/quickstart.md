@@ -44,6 +44,11 @@ Open a terminal (Windows: PowerShell or Git Bash; macOS/Linux: Terminal) and pas
 in one go. Replace `<choose-a-password>` with any password you'll remember — you'll
 need it again in Step 4.
 
+> **Neo4j itself doesn't need a separate install.** There's no app to download beyond
+> Docker — the command below pulls the official `neo4j:5` image the first time you run
+> it (~1-2 minutes, depends on your connection) and runs it as a container. That's the
+> whole "installation."
+
 ```bash
 docker run -d --name kgcs-neo4j \
   -p 7474:7474 -p 7687:7687 \

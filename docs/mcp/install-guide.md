@@ -23,7 +23,13 @@ Claude Desktop / Cowork ──stdio──> mcp-neo4j-cypher ──bolt://──>
 
 ## 2. Start Neo4j (with APOC)
 
-The MCP schema tool requires the APOC plugin, so enable it from the start:
+The MCP schema tool requires the APOC plugin, so enable it from the start.
+
+> **Note.** Neo4j has no separate install step here — the `docker run` command below
+> pulls the official `neo4j:5` image on first run (~1-2 minutes) and runs it as a
+> container. If you're used to Neo4j Desktop: you don't need it for this guide, and the
+> "reference setup" mentioned at the bottom of this doc (Neo4j Enterprise) is only what
+> the KGCS graph was validated against, not a requirement for you.
 
 ```bash
 docker run -d --name kgcs-neo4j \
