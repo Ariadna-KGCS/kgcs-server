@@ -1,0 +1,32 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Materialize pinned kgcs-spec
+        env:
+          KGCS_SPEC_URL: https://github.com/Ariadna-KGCS/kgcs-spec.git
+        run: python tools/sync_spec.py
+
+      - name: Run test suite
+        run: python -m pytest -q
+
+      - name: Verify JSON Schema contracts
+        run: python tools/verify_schemas.py
