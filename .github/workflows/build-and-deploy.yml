@@ -1,10 +1,11 @@
 name: Build and Deploy
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_dispatch: {}
+  # push-to-main trigger removed 2026-07-27: this workflow deploys to Azure
+  # infra (kgcsregistry.azurecr.io, terraform) that has never been
+  # provisioned -- kgcs-infra is dormant by design. Keeping the workflow
+  # file for whenever that infra exists; manual dispatch only until then.
 
 env:
   REGISTRY: kgcsregistry.azurecr.io
