@@ -57,6 +57,18 @@ valuable as code bugs** — this is exactly what the preview is for.
   the working MCP path today is the generic `mcp-neo4j-cypher` server described in
   the install guide.
 
+## Windows note
+
+If you're on Windows and this repo lives on a mounted/network drive (common with
+some sandboxed dev setups), you may see every tracked file listed as `modified`
+after a plain `git status`, with `old mode 100644` / `new mode 100755` diffs and
+no content change. That mount reports all files as executable regardless of
+content; Git faithfully tracks it if `core.filemode` is on. Fix once per clone:
+
+```bash
+git config core.filemode false
+```
+
 ## License
 
 Apache 2.0 ([`LICENSE`](LICENSE)). By contributing, you agree your contribution is
