@@ -217,7 +217,7 @@ off_data = {
         {"id": "T1059", "name": "Command and Scripting Interpreter", "tactic": "Execution", "capec": ["CAPEC-242"], "subtechniques": ["T1059.001"]},
         {"id": "T1059.001", "name": "PowerShell", "tactic": "Execution", "parent_technique": "T1059"},
     ],
-    "attack_paths": [{"weakness_id": "CWE-917", "attack_pattern_id": "CAPEC-242", "technique_id": "T1059"}],
+    "attack_paths": [{"weakness_id": "CWE-917", "attack_pattern_id": "CAPEC-242", "technique_id": "T1059", "mapping_type": "direct"}],
 }
 check("offensive-response valid data", True, ov, off_data)
 
